@@ -50,6 +50,22 @@ pipeline {
                 }
             }
         }
+
+        stage('Update Kubernetes Manifests') {
+            steps {
+                sh """
+                    # Mettre à jour l'image dans deployment.yaml
+                    sed -i 's|image:.*|image: sasow/ticket-reservation-app:${BUILD_NUMBER}|' k8s/deployment.yaml
+                    
+                    # Commit et push des changements
+                    git config user.email "jenkins@local.host"
+                    git config user.name "Jenkins CI"
+                    git add k8s/deployment.yaml
+                    git commit -m "chore(deploy): update image to ${BUILD_NUMBER}"
+                    git push https://github.com/SalifAbdoulSow18/ticket-reservation-app.git HEAD:main
+                """
+            }
+        }
     }
     
     post {
