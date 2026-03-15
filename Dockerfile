@@ -24,9 +24,6 @@ RUN npm run build
 # =========================================
 FROM nginx:alpine AS runner
 
-# Créer un utilisateur non-root pour la sécurité
-RUN adduser -D -u 1000 -g 'nginx' nginx
-
 # Créer les dossiers nécessaires avec les bonnes permissions
 RUN mkdir -p /var/cache/nginx /var/run && \
     chown -R nginx:nginx /var/cache/nginx /var/run && \
