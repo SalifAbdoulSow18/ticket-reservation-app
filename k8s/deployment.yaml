@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-reservation-app
+  namespace: ticket-reservation
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ticket-reservation
+  template:
+    metadata:
+      labels:
+        app: ticket-reservation
+    spec:
+      containers:
+      - name: app
+        image: sasow/ticket-reservation-app:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
