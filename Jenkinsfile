@@ -1,11 +1,3 @@
-
----
-
-## 🐳 **ÉTAPE 2: AJOUTER LE PUSH DOCKER HUB**
-
-Modifiez votre `Jenkinsfile` pour ajouter le stage de push :
-
-```groovy
 pipeline {
     agent any
     
