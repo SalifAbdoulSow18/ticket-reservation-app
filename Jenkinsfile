@@ -55,26 +55,12 @@ pipeline {
             steps {
                 withCredentials([gitUsernamePassword(credentialsId: 'github-credentials')]) {
                     sh '''
-                        # Afficher l'état avant modification
-                        echo "=== AVANT MODIFICATION ==="
-                        cat k8s/deployment.yaml | grep image
+                        # Mise à jour du manifest
+                        sed -i.bak "s|image:.*|        image: sasow/ticket-reservation-app:${BUILD_NUMBER}|" k8s/deployment.yaml
                         
-                        # Version compatible macOS/Linux pour sed
-                        # On utilise sed -i.bak (crée un backup) puis on le supprime
-                        sed -i.bak "s|image:.*|image: sasow/ticket-reservation-app:${BUILD_NUMBER}|" k8s/deployment.yaml
-                        rm -f k8s/deployment.yaml.bak
-                        
-                        # Afficher l'état après modification
-                        echo "=== APRÈS MODIFICATION ==="
-                        cat k8s/deployment.yaml | grep image
-                        
-                        # Configurer Git
-                        git config user.email "jenkins@local.host"
-                        git config user.name "Jenkins CI"
-                        
-                        # Commit et push
+                        # Commit avec [skip ci] pour éviter de relancer Jenkins
                         git add k8s/deployment.yaml
-                        git commit -m "chore(deploy): update image to ${BUILD_NUMBER}"
+                        git commit -m "chore(deploy): update image to ${BUILD_NUMBER} [skip ci]"
                         git push origin HEAD:main
                     '''
                 }
