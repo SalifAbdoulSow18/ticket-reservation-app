@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3000&pause=1000&color=667EEA&center=true&vCenter=true&width=435&lines=%F0%9F%8E%9F%EF%B8%8F+Ticket+Reservation;%F0%9F%87%B8%F0%9F%87%B3+Made+in+Senegal;%F0%9F%91%A8%F0%9F%8F%BD%E2%80%8D%F0%9F%92%BB+by+Salif" alt="Typing SVG" />
+</div>
+
 # 🎟️ Application de Réservation de Tickets - Sénégal
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)

@@ -16,12 +16,17 @@
     <main class="main-content">
       <router-view />
     </main>
+    <SignatureFooter />
   </div>
 </template>
 
 <script>
+import SignatureFooter from './components/SignatureFooter.vue'
 export default {
-  name: 'App'
+  name: 'App',
+  components: {
+    SignatureFooter  // 👈 N'OUBLIEZ PAS DE DÉCLARER LE COMPOSANT
+  }
 }
 </script>
 
