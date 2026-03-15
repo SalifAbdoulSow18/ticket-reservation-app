@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     tools {
-        nodejs 'NodeJS-18'   // Changez ici pour correspondre au nouveau nom
+        nodejs 'NodeJS-22'   // Changez ici pour correspondre au nouveau nom
     }
     
     stages {
@@ -117,28 +117,6 @@ pipeline {
 //             steps {
 //                 echo '📦 Installation des dépendances...'
 //                 sh 'npm install'
-//             }
-//         }
-        
-//         // ÉTAPE 3: Vérification de la qualité du code
-//         stage('Lint') {
-//             steps {
-//                 echo '🔍 Vérification du code avec ESLint...'
-//                 sh 'npm run lint || echo "⚠️  Lint warnings ignored"'
-//             }
-//         }
-        
-//         // ÉTAPE 4: Tests unitaires
-//         stage('Unit Tests') {
-//             steps {
-//                 echo '🧪 Exécution des tests unitaires...'
-//                 sh 'npm run test:unit || echo "⚠️ No tests or tests failed"'
-//             }
-//             post {
-//                 always {
-//                     // Archiver les rapports de test (si générés)
-//                     junit 'test-results/**/*.xml'  // Adaptez selon votre projet
-//                 }
 //             }
 //         }
         
