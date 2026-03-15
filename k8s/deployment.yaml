@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: sasow/ticket-reservation-app:78
+        image: sasow/ticket-reservation-app:79
         ports:
         - containerPort: 8080
         resources:
