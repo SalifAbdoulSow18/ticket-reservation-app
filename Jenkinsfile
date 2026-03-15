@@ -53,17 +53,31 @@ pipeline {
 
         stage('Update Kubernetes Manifests') {
             steps {
-                sh """
-                    # Mettre à jour l'image dans deployment.yaml
-                    sed -i 's|image:.*|image: sasow/ticket-reservation-app:${BUILD_NUMBER}|' k8s/deployment.yaml
-                    
-                    # Commit et push des changements
-                    git config user.email "jenkins@local.host"
-                    git config user.name "Jenkins CI"
-                    git add k8s/deployment.yaml
-                    git commit -m "chore(deploy): update image to ${BUILD_NUMBER}"
-                    git push https://github.com/SalifAbdoulSow18/ticket-reservation-app.git HEAD:main
-                """
+                withCredentials([gitUsernamePassword(credentialsId: 'github-credentials')]) {
+                    sh '''
+                        # Afficher l'état avant modification
+                        echo "=== AVANT MODIFICATION ==="
+                        cat k8s/deployment.yaml | grep image
+                        
+                        # Version compatible macOS/Linux pour sed
+                        # On utilise sed -i.bak (crée un backup) puis on le supprime
+                        sed -i.bak "s|image:.*|image: sasow/ticket-reservation-app:${BUILD_NUMBER}|" k8s/deployment.yaml
+                        rm -f k8s/deployment.yaml.bak
+                        
+                        # Afficher l'état après modification
+                        echo "=== APRÈS MODIFICATION ==="
+                        cat k8s/deployment.yaml | grep image
+                        
+                        # Configurer Git
+                        git config user.email "jenkins@local.host"
+                        git config user.name "Jenkins CI"
+                        
+                        # Commit et push
+                        git add k8s/deployment.yaml
+                        git commit -m "chore(deploy): update image to ${BUILD_NUMBER}"
+                        git push origin HEAD:main
+                    '''
+                }
             }
         }
     }
