@@ -48,7 +48,6 @@ pipeline {
             }
         }
         
-        // ✅ NOUVEAU STAGE : Push sur Docker Hub
         stage('Push to Docker Hub') {
             steps {
                 script {
