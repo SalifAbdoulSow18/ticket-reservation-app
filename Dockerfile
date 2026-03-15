@@ -4,19 +4,9 @@
 FROM node:22-alpine AS builder
 
 WORKDIR /app
-
-# 1. D'abord, copier UNIQUEMENT les fichiers de dépendances
 COPY package*.json ./
-COPY package-lock.json ./
-
-# 2. INSTALLER LES DÉPENDANCES DANS LE CONTENEUR LINUX
-#    C'est l'étape cruciale ! Ça installera les bons binaires Linux
 RUN npm ci
-
-# 3. Ensuite seulement, copier le reste du code source
 COPY . .
-
-# 4. Build
 RUN npm run build
 
 # =========================================
@@ -24,10 +14,22 @@ RUN npm run build
 # =========================================
 FROM nginx:alpine AS runner
 
-# Configuration...
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Créer les dossiers nécessaires avec les bonnes permissions
+RUN mkdir -p /var/cache/nginx /var/run /tmp/nginx && \
+    chown -R nginx:nginx /var/cache/nginx /var/run /tmp/nginx && \
+    chmod -R 755 /var/cache/nginx /var/run /tmp/nginx
+
+# Copier la configuration Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Copier les fichiers compilés
+COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
+
+# Exposer le port
 EXPOSE 8080
+
+# Utilisateur non-root
 USER nginx
+
+# Démarrer Nginx
 CMD ["nginx", "-g", "daemon off;"]
