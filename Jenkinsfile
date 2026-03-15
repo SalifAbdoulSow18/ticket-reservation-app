@@ -55,17 +55,18 @@ pipeline {
             steps {
                 withCredentials([gitUsernamePassword(credentialsId: 'github-credentials')]) {
                     sh '''
-                        # Se synchroniser d'abord
+                        # 1. Se synchroniser
                         git pull --rebase origin main
                         
-                        # Modifier le manifest
-                        sed -i.bak "s|image:.*|        image: sasow/ticket-reservation-app:${BUILD_NUMBER}|" k8s/deployment.yaml
+                        # 2. Changer UNIQUEMENT le numéro de build (indentation préservée)
+                        sed -i.bak "s/\\(image:.*:\\)[0-9]*/\\1${BUILD_NUMBER}/" k8s/deployment.yaml
+                        rm -f k8s/deployment.yaml.bak
                         
-                        # Commit avec [skip ci] (obligatoire !)
+                        # 3. Commit avec [skip ci] pour éviter la boucle
                         git add k8s/deployment.yaml
-                        git commit -m "chore(deploy): update image to ${BUILD_NUMBER} [skip ci]"
+                        git commit -m "chore: update image tag to ${BUILD_NUMBER} [skip ci]"
                         
-                        # Push
+                        # 4. Push
                         git push origin HEAD:main
                     '''
                 }
