@@ -8,6 +8,26 @@ pipeline {
         DOCKER_PASSWORD = credentials('docker-hub-credentials')
     }
     
+    triggers {
+        // Ignorer les pushes qui viennent de Jenkins lui-même
+        pollSCM('')
+    }
+    
+    stages {
+        stage('Check if triggered by Jenkins') {
+            when {
+                expression {
+                    // Ne pas run si le commit est de Jenkins
+                    sh(script: 'git log -1 --pretty=%B | grep -q "\\[skip ci\\]"', returnStatus: true) != 0
+                }
+            }
+            steps {
+                echo "Build déclenché par un vrai commit"
+            }
+        }
+        // ... reste du pipeline
+    }
+
     stages {
         stage('Checkout') {
             steps {
