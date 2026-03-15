@@ -34,19 +34,20 @@ pipeline {
         
         stage('Push to Docker Hub') {
             steps {
-                sh """
-                    export PATH=\$PATH:/opt/homebrew/bin
-                    
-                    # Login avec password-stdin (sécurisé)
-                    echo "${DOCKER_PASSWORD}" | docker login -u sasow --password-stdin
-                    
-                    # Push des images
-                    docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
-                    docker push ${DOCKER_IMAGE}:latest
-                    
-                    # Logout (bonne pratique)
-                    docker logout
-                """
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        export PATH=$PATH:/opt/homebrew/bin
+                        echo "Test de connexion avec le token..."
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        echo "Connexion réussie."
+                        docker push sasow/ticket-reservation-app:${BUILD_NUMBER}
+                        docker push sasow/ticket-reservation-app:latest
+                    '''
+                }
             }
         }
     }
