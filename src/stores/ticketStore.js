@@ -6,7 +6,7 @@ export const useTicketStore = defineStore('ticket', {
       {
         id: 1,
         title: 'Concert de Youssou Ndour',
-        date: '2024-07-15',
+        date: '2026-07-15',
         time: '21:00',
         venue: 'Grand Théâtre de Dakar',
         address: 'Boulevard de la République, Dakar',
@@ -18,7 +18,7 @@ export const useTicketStore = defineStore('ticket', {
       {
         id: 2,
         title: 'Festival de Jazz de Saint-Louis',
-        date: '2024-07-20',
+        date: '2026-07-20',
         time: '19:30',
         venue: 'Place Faidherbe',
         address: 'Saint-Louis, Sénégal',
@@ -30,7 +30,7 @@ export const useTicketStore = defineStore('ticket', {
       {
         id: 3,
         title: 'Match de lutte sénégalaise',
-        date: '2024-07-25',
+        date: '2026-07-25',
         time: '17:00',
         venue: 'Arène nationale de Pikine',
         address: 'Pikine, Dakar',
@@ -42,7 +42,7 @@ export const useTicketStore = defineStore('ticket', {
       {
         id: 4,
         title: 'Exposition d\'art contemporain',
-        date: '2024-08-01',
+        date: '2026-08-01',
         time: '10:00',
         venue: 'Village des Arts',
         address: 'Route de Ouakam, Dakar',
@@ -54,7 +54,7 @@ export const useTicketStore = defineStore('ticket', {
       {
         id: 5,
         title: 'Festival international de folklore',
-        date: '2024-08-10',
+        date: '2026-08-10',
         time: '16:00',
         venue: 'Place de l\'Obélisque',
         address: 'Dakar, Sénégal',
