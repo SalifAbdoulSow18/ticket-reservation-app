@@ -4,20 +4,18 @@ pipeline {
     environment {
         DOCKER_IMAGE = 'sasow/ticket-reservation-app'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
-        // 👇 On récupère le password depuis les credentials
         DOCKER_PASSWORD = credentials('docker-hub-credentials')
     }
     
     triggers {
-        // Ignorer les pushes qui viennent de Jenkins lui-même
         pollSCM('')
     }
     
+    // UN SEUL BLOC stages !
     stages {
         stage('Check if triggered by Jenkins') {
             when {
                 expression {
-                    // Ne pas run si le commit est de Jenkins
                     sh(script: 'git log -1 --pretty=%B | grep -q "\\[skip ci\\]"', returnStatus: true) != 0
                 }
             }
@@ -25,10 +23,7 @@ pipeline {
                 echo "Build déclenché par un vrai commit"
             }
         }
-        // ... reste du pipeline
-    }
-
-    stages {
+        
         stage('Checkout') {
             steps {
                 checkout scm
@@ -61,9 +56,7 @@ pipeline {
                 )]) {
                     sh '''
                         export PATH=$PATH:/opt/homebrew/bin
-                        echo "Test de connexion avec le token..."
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        echo "Connexion réussie."
                         docker push sasow/ticket-reservation-app:${BUILD_NUMBER}
                         docker push sasow/ticket-reservation-app:latest
                     '''
@@ -75,18 +68,11 @@ pipeline {
             steps {
                 withCredentials([gitUsernamePassword(credentialsId: 'github-credentials')]) {
                     sh '''
-                        # 1. Se synchroniser
                         git pull --rebase origin main
-                        
-                        # 2. Changer UNIQUEMENT le numéro de build (indentation préservée)
                         sed -i.bak "s/\\(image:.*:\\)[0-9]*/\\1${BUILD_NUMBER}/" k8s/deployment.yaml
                         rm -f k8s/deployment.yaml.bak
-                        
-                        # 3. Commit avec [skip ci] pour éviter la boucle
                         git add k8s/deployment.yaml
                         git commit -m "chore: update image tag to ${BUILD_NUMBER} [skip ci]"
-                        
-                        # 4. Push
                         git push origin HEAD:main
                     '''
                 }
