@@ -43,6 +43,9 @@ pipeline {
         stage('Push to Docker Hub') {
             steps {
                 script {
+                    // Définir le chemin absolu de Docker
+                    env.PATH = "/opt/homebrew/bin:${env.PATH}"
+                    
                     docker.withRegistry("https://${DOCKER_REGISTRY}", DOCKER_CREDENTIALS) {
                         docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
                         docker.image("${DOCKER_IMAGE}:latest").push()
