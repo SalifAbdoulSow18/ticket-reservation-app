@@ -55,12 +55,17 @@ pipeline {
             steps {
                 withCredentials([gitUsernamePassword(credentialsId: 'github-credentials')]) {
                     sh '''
-                        # Mise à jour du manifest
+                        # Se synchroniser d'abord
+                        git pull --rebase origin main
+                        
+                        # Modifier le manifest
                         sed -i.bak "s|image:.*|        image: sasow/ticket-reservation-app:${BUILD_NUMBER}|" k8s/deployment.yaml
                         
-                        # Commit avec [skip ci] pour éviter de relancer Jenkins
+                        # Commit avec [skip ci] (obligatoire !)
                         git add k8s/deployment.yaml
                         git commit -m "chore(deploy): update image to ${BUILD_NUMBER} [skip ci]"
+                        
+                        # Push
                         git push origin HEAD:main
                     '''
                 }
