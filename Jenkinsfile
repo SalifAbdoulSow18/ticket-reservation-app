@@ -32,6 +32,10 @@ pipeline {
     //     pollSCM('* * * * *')  // Vérifie toutes les minutes
     //     // Alternative: utiliser webhook GitHub (voir configuration plus bas)
     // }
+
+    tools {
+        nodejs 'NodeJS-25'
+    }
     
     // =========================================
     // ÉTAPES DE LA PIPELINE
