@@ -1,46 +1,33 @@
 # =========================================
-# STAGE 1: BUILD - Compilation de l'application Vue.js
+# STAGE 1: BUILD
 # =========================================
 FROM node:22-alpine AS builder
 
-# Définir le répertoire de travail
 WORKDIR /app
 
-# Copier les fichiers de dépendances (pour bénéficier du cache Docker)
+# 1. D'abord, copier UNIQUEMENT les fichiers de dépendances
 COPY package*.json ./
 COPY package-lock.json ./
 
-# Installer les dépendances
-RUN npm ci --only=production
+# 2. INSTALLER LES DÉPENDANCES DANS LE CONTENEUR LINUX
+#    C'est l'étape cruciale ! Ça installera les bons binaires Linux
+RUN npm ci
 
-# Copier le reste du code source
+# 3. Ensuite seulement, copier le reste du code source
 COPY . .
 
-# Compiler l'application pour la production
+# 4. Build
 RUN npm run build
 
 # =========================================
-# STAGE 2: RUN - Serveur Nginx pour les fichiers statiques
+# STAGE 2: RUN
 # =========================================
 FROM nginx:alpine AS runner
 
-# Créer les dossiers nécessaires avec les bonnes permissions
-RUN mkdir -p /var/cache/nginx /var/run && \
-    chown -R nginx:nginx /var/cache/nginx /var/run && \
-    touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid
-
-# Copier la configuration Nginx personnalisée
+# Configuration...
+COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copier les fichiers compilés depuis l'étape builder
-COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
-
-# Exposer le port (port non-privilégié)
 EXPOSE 8080
-
-# Passer à l'utilisateur non-root
 USER nginx
-
-# Démarrer Nginx en avant-plan
 CMD ["nginx", "-g", "daemon off;"]
