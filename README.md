@@ -186,3 +186,229 @@ ticket-reservation-app/
 │   ACCUEIL   │
 │    (fin)    │
 └─────────────┘
+
+
+# 🎟️ TICKET RESERVATION APP - GUIDE COMPLET
+
+## 📋 Table des matières
+1. [Création du projet Vue.js](#1-création-du-projet-vuejs)
+2. [Dockerisation](#2-dockerisation)
+3. [Jenkins & CI/CD](#3-jenkins--cicd)
+4. [Kubernetes](#4-kubernetes)
+5. [ArgoCD](#5-argocd)
+6. [Commandes de vérification](#6-commandes-de-vérification)
+7. [Dépannage](#7-dépannage)
+
+---
+📚 README - GUIDE COMPLET DU PROJET
+
+## 1. CRÉATION DU PROJET VUE.JS
+
+```bash
+# 1.1 Créer le projet
+npm create vue@latest ticket-reservation-app
+cd ticket-reservation-app
+
+# 1.2 Installer les dépendances
+npm install
+npm install pinia @vueuse/core
+
+# 1.3 Lancer en développement
+npm run dev
+# Accès : http://localhost:5173
+
+# 1.4 Build pour production
+npm run build
+# Les fichiers sont générés dans /dist
+
+## 2. DOCKERISATION
+- Dockerfile
+- nginx.conf
+
+## 3. JENKINS & CI/CD
+  ------
+  3.1 Installation Jenkins (macOS)
+
+  # 3.1.1 Installation avec Homebrew
+  brew install jenkins-lts
+  brew services start jenkins-lts
+
+  # 3.1.2 Accès
+  open http://localhost:8080
+  # Récupérer le mot de passe :
+  cat ~/.jenkins/secrets/initialAdminPassword
+
+  # 3.1.3 Configurer le PATH pour Docker
+  sudo nano /opt/homebrew/opt/jenkins-lts/homebrew.mxcl.jenkins-lts.plist
+
+  brew services restart jenkins-lts
+  
+  ------
+  3.2 Plugins Jenkins nécessaires
+    Git
+
+    NodeJS
+
+    Docker Pipeline
+
+    Pipeline Stage View
+
+    GitHub Integration
+
+  ------
+  3.3 Credentials Jenkins
+
+    # GitHub
+    Type: Username with password
+    Username: votre-username
+    Password: [GitHub Personal Access Token]
+    ID: github-credentials
+
+    # Docker Hub
+    Type: Username with password  
+    Username: votre-username
+    Password: [Docker Hub Access Token]
+    ID: docker-hub-credentials
+
+  ------
+  3.4 Jenkinsfile complet
+
+  ------
+  3.5 Configuration Webhook GitHub
+    GitHub → Repository → Settings → Webhooks → Add webhook
+
+    Payload URL: http://[VOTRE_IP]:8080/github-webhook/
+
+    Content type: application/json
+
+    Events: "Just the push event"
+
+    Active: ✅
+
+------
+  4. KUBERNETES
+  4.1 Installation Minikube (macOS)  
+
+    # 4.1.1 Installer Minikube
+    brew install minikube kubectl
+
+    # 4.1.2 Démarrer le cluster
+    minikube start --cpus=4 --memory=4096 --driver=docker
+
+    # 4.1.3 Vérifier
+    kubectl get nodes
+    minikube status
+
+  4.2 Manifests Kubernetes
+    k8s/namespace.yaml
+    k8s/deployment.yaml
+    k8s/service.yaml
+
+  4.3 Déploiement manuel
+
+    # 4.3.1 Appliquer les manifests
+    kubectl apply -f k8s/namespace.yaml
+    kubectl apply -f k8s/deployment.yaml
+    kubectl apply -f k8s/service.yaml
+
+    # 4.3.2 Vérifier
+    kubectl get pods -n ticket-reservation -w
+    kubectl get svc -n ticket-reservation
+
+    # 4.3.3 Exposer l'application
+    kubectl port-forward svc/ticket-reservation-service -n ticket-reservation 8082:80
+    open http://localhost:8082
+
+  5. ARGOCD
+    5.1 Installation ArgoCD
+    # 5.1.1 Créer le namespace et installer
+    kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+    # 5.1.2 Attendre que les pods soient prêts
+    kubectl wait --for=condition=Ready pods --all -n argocd --timeout=300s
+    kubectl get pods -n argocd
+
+    # 5.1.3 Exposer ArgoCD
+    kubectl port-forward svc/argocd-server -n argocd 8081:443 &
+    # Accès : https://localhost:8081
+
+    # 5.1.4 Récupérer le mot de passe admin
+    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+  
+    5.2 Installer la CLI ArgoCD
+
+    brew install argocd
+    argocd login localhost:8081 --insecure
+    # Username: admin
+    # Password: [mot de passe récupéré]
+
+    5.3 Déclarer l'application
+    argocd-application.yaml
+    kubectl apply -f argocd-application.yaml
+    # Lister les applications
+    argocd app list
+
+    # Synchroniser
+    argocd app sync ticket-reservation-app
+
+    # Voir les détails
+    argocd app get ticket-reservation-app
+
+  6. COMMANDES DE VÉRIFICATION
+    6.1 Kubernetes
+    # Pods
+    kubectl get pods -n ticket-reservation
+    kubectl get pods -n ticket-reservation -w
+    kubectl get pods -n ticket-reservation -o wide
+
+    # Logs
+    kubectl logs -n ticket-reservation -l app=ticket-reservation-app --tail=50
+    kubectl logs -n ticket-reservation -l app=ticket-reservation-app -f
+
+    # Services
+    kubectl get svc -n ticket-reservation
+    kubectl describe svc -n ticket-reservation ticket-reservation-service
+
+    # Événements
+    kubectl get events -n ticket-reservation --sort-by='.lastTimestamp'
+
+    6.2 ArgoCD
+
+    # État de l'application
+    argocd app get ticket-reservation-app
+    argocd app get ticket-reservation-app -w
+
+    # Historique
+    argocd app history ticket-reservation-app
+
+    # Logs des composants ArgoCD
+    kubectl logs -n argocd -l app.kubernetes.io/name=argocd-server --tail=50
+    kubectl logs -n argocd -l app.kubernetes.io/name=argocd-repo-server --tail=50
+
+    6.3 Tester l'application
+
+    # Exposer l'application
+    kubectl port-forward svc/ticket-reservation-service -n ticket-reservation 8082:80
+
+    # Dans le navigateur
+    open http://localhost:8082
+
+  7. DÉPANNAGE
+    7.1 Problèmes courants
+      Problème	Solution
+      CrashLoopBackOff	Vérifier les logs : kubectl logs -n ticket-reservation [POD]
+      ImagePullBackOff	Vérifier l'image sur Docker Hub et les credentials
+      docker: command not found	Configurer le PATH dans Jenkins
+      Boucle infinie Jenkins	Ajouter [skip ci] dans les commits Jenkins
+      ArgoCD ne sync pas	Vérifier le projet : argocd proj list
+
+    7.2 Redémarrages utiles
+      # Redémarrer les pods
+      kubectl rollout restart deployment -n ticket-reservation ticket-reservation-app
+
+      # Revenir en arrière
+      kubectl rollout undo deployment -n ticket-reservation ticket-reservation-app
+
+      # Redémarrer Jenkins
+      brew services restart jenkins-lts
